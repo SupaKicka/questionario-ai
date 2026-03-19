@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Questionario AI — <%= company.name %></title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a1a; line-height: 1.5; }
+    .header { background: #2c3e50; color: #fff; padding: 32px; text-align: center; }
+    .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .header p { font-size: 14px; opacity: .8; }
+    .header .company { font-size: 13px; opacity: .6; margin-top: 8px; }
+
+    .container { max-width: 720px; margin: 0 auto; padding: 24px 20px 60px; }
+
+    .section-title { font-size: 16px; font-weight: 700; color: #2c3e50; padding: 14px 0 8px; margin-top: 20px; border-bottom: 2px solid #2c3e50; margin-bottom: 16px; }
+
+    .question-card { background: #fff; border-radius: 10px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .question-card .q-num { font-size: 11px; font-weight: 700; color: #2c3e50; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+    .question-card .q-text { font-size: 15px; font-weight: 600; margin-bottom: 14px; color: #1a1a1a; }
+
+    .options label { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; margin-bottom: 4px; border-radius: 8px; cursor: pointer; transition: background .15s; font-size: 14px; color: #333; }
+    .options label:hover { background: #f5f7fa; }
+    .options input[type=radio],
+    .options input[type=checkbox] { margin-top: 3px; accent-color: #2c3e50; flex-shrink: 0; }
+
+    .text-input { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; transition: border .2s; }
+    .text-input:focus { border-color: #2c3e50; }
+    textarea.text-input { min-height: 80px; resize: vertical; }
+
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .profile-grid .field label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 6px; }
+    @media (max-width: 500px) { .profile-grid { grid-template-columns: 1fr; } }
+
+    .submit-area { text-align: center; margin-top: 32px; }
+    .submit-btn { padding: 14px 48px; background: #2c3e50; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: background .2s; }
+    .submit-btn:hover { background: #1a252f; }
+    .submit-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: #2c3e50; transition: width .3s; z-index: 100; }
+
+    .note { font-size: 12px; color: #888; margin-top: 4px; }
+    .required { color: #dc2626; }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" id="progress"></div>
+
+  <div class="header">
+    <h1>Questionario di Valutazione</h1>
+    <p>Competenze in Intelligenza Artificiale</p>
+    <div class="company"><%= company.name %></div>
+  </div>
+
+  <div class="container">
+    <form method="POST" action="/test/<%= company.slug %>" id="quiz-form">
+
+      <!-- Profilo -->
+      <div class="section-title">Sezione 1 — Profilo</div>
+
+      <div class="question-card">
+        <div class="profile-grid">
+          <div class="field">
+            <label for="respondent_name">Nome e cognome</label>
+            <input type="text" id="respondent_name" name="respondent_name" class="text-input" required>
+          </div>
+          <div class="field">
+            <label for="respondent_role">Ruolo in azienda</label>
+            <input type="text" id="respondent_role" name="respondent_role" class="text-input" placeholder="Es. Manager, Tecnico IT, Commerciale..." required>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="q-num">Domanda 2</div>
+        <div class="q-text">Hai mai utilizzato strumenti di AI (es. ChatGPT, Copilot, Midjourney)?</div>
+        <div class="options">
+          <label><input type="radio" name="q2" value="0" required> Mai</label>
+          <label><input type="radio" name="q2" value="1"> Sì, occasionalmente</label>
+          <label><input type="radio" name="q2" value="2"> Sì, regolarmente</label>
+          <label><input type="radio" name="q2" value="3"> Sì, quotidianamente per lavoro</label>
+        </div>
+      </div>
+
+      <!-- Scored questions grouped by section -->
+      <% let currentSection = ''; %>
+      <% for (const q of questions) { %>
+        <% if (q.section !== currentSection) { %>
+          <% currentSection = q.section; %>
+          <% const sectionNum = q.id <= 5 ? 2 : q.id <= 8 ? 3 : q.id <= 11 ? 4 : q.id <= 14 ? 5 : 6; %>
+          <div class="section-title">Sezione <%= sectionNum %> — <%= q.section %></div>
+        <% } %>
+
+        <div class="question-card">
+          <div class="q-num">Domanda <%= q.id %></div>
+          <div class="q-text"><%= q.text %> <% if (!q.multi) { %><span class="required">*</span><% } %></div>
+          <div class="options">
+            <% for (let i = 0; i < q.options.length; i++) { %>
+              <label>
+                <% if (q.multi) { %>
+                  <input type="checkbox" name="q<%= q.id %>" value="<%= i %>">
+                <% } else { %>
+                  <input type="radio" name="q<%= q.id %>" value="<%= i %>" required>
+                <% } %>
+                <%= q.options[i] %>
+              </label>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Open questions -->
+      <div class="section-title">Sezione 7 — Domande Aperte</div>
+
+      <div class="question-card">
+        <div class="q-num">Domanda 20</div>
+        <div class="q-text">Descrivi brevemente come potresti usare l'AI nel tuo lavoro:</div>
+        <textarea name="open_20" class="text-input" placeholder="Scrivi qui la tua risposta..."></textarea>
+      </div>
+
+      <div class="question-card">
+        <div class="q-num">Domanda 21</div>
+        <div class="q-text">Qual è la tua principale preoccupazione nell'utilizzo dell'AI?</div>
+        <textarea name="open_21" class="text-input" placeholder="Scrivi qui la tua risposta..."></textarea>
+      </div>
+
+      <div class="submit-area">
+        <button type="submit" class="submit-btn" id="submit-btn">Invia questionario</button>
+        <div class="note" style="margin-top:12px">Le risposte sono anonime e saranno utilizzate per personalizzare il corso</div>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Progress bar
+    const form = document.getElementById('quiz-form');
+    const progress = document.getElementById('progress');
+    const allRequired = form.querySelectorAll('input[required], textarea[required]');
+    const radioGroups = new Set();
+    form.querySelectorAll('input[type=radio][required]').forEach(r => radioGroups.add(r.name));
+    const totalSteps = radioGroups.size + form.querySelectorAll('input[type=text][required]').length;
+
+    function updateProgress() {
+      let filled = 0;
+      radioGroups.forEach(name => {
+        if (form.querySelector(`input[name="${name}"]:checked`)) filled++;
+      });
+      form.querySelectorAll('input[type=text][required]').forEach(inp => {
+        if (inp.value.trim()) filled++;
+      });
+      const pct = Math.min(100, Math.round(filled / totalSteps * 100));
+      progress.style.width = pct + '%';
+    }
+
+    form.addEventListener('change', updateProgress);
+    form.addEventListener('input', updateProgress);
+
+    // Prevent double submit
+    form.addEventListener('submit', function() {
+      document.getElementById('submit-btn').disabled = true;
+      document.getElementById('submit-btn').textContent = 'Invio in corso...';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "questionario-ai",
+  "version": "1.0.0",
+  "description": "Questionario di valutazione competenze AI",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "sql.js": "^1.11.0",
+    "uuid": "^11.0.3"
+  }
+}
