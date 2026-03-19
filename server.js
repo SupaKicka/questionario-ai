@@ -8,7 +8,7 @@ const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin2025';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ai_surv2026';
 const ADMIN_TOKEN = crypto.randomBytes(32).toString('hex');
 const DB_PATH = process.env.DB_PATH || './data/quiz.db';
 

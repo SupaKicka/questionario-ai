@@ -17,7 +17,7 @@ npm install
 node server.js
 ```
 
-Apri http://localhost:8080/admin (password default: `admin2025`)
+Apri http://localhost:8080/admin (password default: `ai_surv2026`)
 
 ## Deploy su Cloud Run
 
@@ -67,7 +67,7 @@ Per un uso in produzione con molti utenti, considera la migrazione a PostgreSQL 
 | Variabile        | Default       | Descrizione                    |
 |------------------|---------------|--------------------------------|
 | `PORT`           | `8080`        | Porta del server               |
-| `ADMIN_PASSWORD` | `admin2025`   | Password area admin            |
+| `ADMIN_PASSWORD` | `ai_surv2026`   | Password area admin            |
 | `DB_PATH`        | `./data/quiz.db` | Percorso database SQLite    |
 
 ## Struttura
