@@ -162,6 +162,9 @@ function requireAdmin(req, res, next) {
   res.redirect('/admin/login');
 }
 
+// --- Root ---
+app.get('/', (req, res) => res.redirect('/admin'));
+
 // --- Admin Routes ---
 
 app.get('/admin/login', (req, res) => {
