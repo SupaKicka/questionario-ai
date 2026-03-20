@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
+const { Storage } = require('@google-cloud/storage');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -12,12 +13,25 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ai_surv2026';
 const ADMIN_TOKEN = crypto.randomBytes(32).toString('hex');
 const DB_PATH = process.env.DB_PATH || './data/quiz.db';
 
+// ─── GCS persistence ──────────────────────────────────────────────────────────
+const GCS_BUCKET = process.env.GCS_BUCKET || '';   // es. "questionario-ai-data"
+const GCS_OBJECT = process.env.GCS_OBJECT || 'quiz.db';
+const useGcs = !!GCS_BUCKET;
+const gcs = useGcs ? new Storage() : null;
+
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
 let db;
+
+// Salva su disco + upload asincrono su GCS (fire-and-forget con log errori)
 function saveDb() {
   const data = db.export();
   fs.writeFileSync(DB_PATH, Buffer.from(data));
+  if (useGcs) {
+    gcs.bucket(GCS_BUCKET).file(GCS_OBJECT)
+      .save(Buffer.from(data), { resumable: false, contentType: 'application/octet-stream' })
+      .catch(err => console.error('[GCS] Errore upload:', err.message));
+  }
 }
 
 // ─── Self-Assessment Questions ────────────────────────────────────────────────
@@ -253,11 +267,35 @@ app.post('/test/:slug', (req, res) => {
 // ─── Start ────────────────────────────────────────────────────────────────────
 async function start() {
   const SQL = await initSqlJs();
-  db = fs.existsSync(DB_PATH) ? new SQL.Database(fs.readFileSync(DB_PATH)) : new SQL.Database();
+
+  // Carica il DB: prima prova da GCS, poi da disco locale, altrimenti crea vuoto
+  if (useGcs) {
+    try {
+      console.log(`[GCS] Download db da gs://${GCS_BUCKET}/${GCS_OBJECT}...`);
+      await gcs.bucket(GCS_BUCKET).file(GCS_OBJECT).download({ destination: DB_PATH });
+      console.log('[GCS] DB scaricato correttamente.');
+    } catch (err) {
+      if (err.code === 404) {
+        console.log('[GCS] Nessun DB esistente sul bucket, ne creo uno nuovo.');
+      } else {
+        console.error('[GCS] Errore download DB:', err.message);
+      }
+    }
+  }
+
+  db = fs.existsSync(DB_PATH)
+    ? new SQL.Database(fs.readFileSync(DB_PATH))
+    : new SQL.Database();
+
   db.run(`CREATE TABLE IF NOT EXISTS companies (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, slug TEXT NOT NULL UNIQUE, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`);
   db.run(`CREATE TABLE IF NOT EXISTS responses (id INTEGER PRIMARY KEY AUTOINCREMENT, company_id INTEGER NOT NULL, respondent_name TEXT NOT NULL DEFAULT '', respondent_role TEXT NOT NULL DEFAULT '', answers TEXT NOT NULL, score INTEGER NOT NULL, level TEXT NOT NULL, open_20 TEXT DEFAULT '', open_21 TEXT DEFAULT '', created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (company_id) REFERENCES companies(id))`);
   saveDb();
-  app.listen(PORT, () => { console.log(`Server: http://localhost:${PORT}`); });
+
+  app.listen(PORT, () => {
+    console.log(`Server: http://localhost:${PORT}`);
+    if (useGcs) console.log(`[GCS] Persistenza attiva: gs://${GCS_BUCKET}/${GCS_OBJECT}`);
+    else console.log('[GCS] ATTENZIONE: GCS_BUCKET non impostato, uso solo disco locale (dati persi al riavvio).');
+  });
 }
 
 start().catch(err => { console.error(err); process.exit(1); });
