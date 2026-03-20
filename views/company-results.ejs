@@ -5,189 +5,399 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Risultati — <%= company.name %></title>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-  <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --navy: #0f1c2e; --navy2: #1a2e47;
+      --blue: #2f6fef; --blue-l: #e8f0fe;
+      --green: #10b981; --green-l: #d1fae5;
+      --amber: #f59e0b; --amber-l: #fef3c7;
+      --red: #ef4444; --red-l: #fee2e2;
+      --orange: #f97316; --orange-l: #ffedd5;
+      --text: #1a1a2e; --muted: #6b7280; --border: #e5e7eb;
+      --bg: #f0f2f6; --card: #fff; --r: 12px;
+    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a1a; }
-    .topbar { background: #2c3e50; color: #fff; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; }
-    .topbar h1 { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 12px; }
-    .topbar h1 img { width: 44px; height: 44px; object-fit: contain; }
-    .topbar a { color: rgba(255,255,255,.7); text-decoration: none; font-size: 13px; }
-    .topbar a:hover { color: #fff; }
-    .container { max-width: 1100px; margin: 32px auto; padding: 0 20px; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); }
 
-    .card { background: #fff; border-radius: 12px; padding: 28px 32px; box-shadow: 0 1px 6px rgba(0,0,0,.06); margin-bottom: 24px; }
-    .card h2 { font-size: 17px; color: #2c3e50; margin-bottom: 16px; }
+    /* ── Topbar ── */
+    .topbar { background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%); color: #fff; padding: 0 28px; height: 60px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 200; }
+    .topbar-brand { display: flex; align-items: center; gap: 10px; }
+    .topbar-brand img { width: 32px; height: 32px; object-fit: contain; }
+    .topbar-brand .bname { font-weight: 700; font-size: 14px; }
+    .topbar-brand .bsub { font-size: 11px; opacity: .5; }
+    .topbar-nav a { color: rgba(255,255,255,.65); text-decoration: none; font-size: 13px; font-weight: 500; }
+    .topbar-nav a:hover { color: #fff; }
 
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .stat-box { background: #f8f9fa; border-radius: 10px; padding: 20px; text-align: center; }
-    .stat-box .value { font-size: 28px; font-weight: 700; color: #2c3e50; }
-    .stat-box .label { font-size: 12px; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
-    .stat-box.principiante .value { color: #dc2626; }
-    .stat-box.intermedio .value { color: #d97706; }
-    .stat-box.avanzato .value { color: #16a34a; }
+    /* ── Page ── */
+    .page { max-width: 1140px; margin: 0 auto; padding: 24px 16px 72px; }
 
-    .bar-chart { display: flex; gap: 4px; height: 28px; border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
-    .bar-chart .seg { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; min-width: 30px; transition: width .3s; }
-    .seg.p { background: #ef4444; }
-    .seg.i { background: #f59e0b; }
-    .seg.a { background: #22c55e; }
+    /* ── Company header ── */
+    .company-head { background: var(--card); border-radius: var(--r); padding: 22px 28px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    .company-head h1 { font-size: 22px; font-weight: 800; }
+    .company-head .link-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .link-code { background: var(--bg); padding: 7px 12px; border-radius: 8px; font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .btn { padding: 9px 18px; border: none; border-radius: 9px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: all .18s; font-family: inherit; }
+    .btn-sm { padding: 7px 14px; font-size: 12px; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+    .btn-outline:hover { background: var(--bg); }
+    .btn-primary { background: var(--navy); color: #fff; }
+    .btn-primary:hover { background: #0a1422; }
+    .btn-green { background: var(--green-l); color: #065f46; border: none; }
+    .btn-green:hover { background: #a7f3d0; }
 
-    table { width: 100%; border-collapse: collapse; }
-    thead th { text-align: left; font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: .5px; padding: 10px 12px; border-bottom: 2px solid #eee; }
-    tbody td { padding: 12px; border-bottom: 1px solid #f0f0f0; font-size: 13px; vertical-align: top; }
-    tbody tr:hover { background: #fafafa; }
+    /* ── KPI row ── */
+    .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 18px; }
+    @media (max-width: 700px) { .kpi-row { grid-template-columns: repeat(3, 1fr); } }
+    .kpi { background: var(--card); border-radius: var(--r); padding: 18px 16px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    .kpi .val { font-size: 28px; font-weight: 800; line-height: 1; }
+    .kpi .lbl { font-size: 10px; color: var(--muted); margin-top: 5px; text-transform: uppercase; letter-spacing: .6px; font-weight: 600; }
+    .kpi.red .val { color: var(--red); }
+    .kpi.amber .val { color: var(--amber); }
+    .kpi.green .val { color: var(--green); }
+    .kpi.blue .val { color: var(--blue); }
 
-    .level { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
-    .level-Principiante { background: #fef2f2; color: #dc2626; }
-    .level-Intermedio { background: #fffbeb; color: #d97706; }
-    .level-Avanzato { background: #f0fdf4; color: #16a34a; }
+    /* ── Level bar ── */
+    .level-bar-wrap { margin: 14px 0 8px; }
+    .level-bar { display: flex; height: 24px; border-radius: 8px; overflow: hidden; gap: 2px; }
+    .seg { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; min-width: 30px; transition: width .5s; }
+    .seg.p { background: var(--red); }
+    .seg.i { background: var(--amber); }
+    .seg.a { background: var(--green); }
+    .level-legend { display: flex; gap: 18px; font-size: 11px; color: var(--muted); margin-top: 6px; flex-wrap: wrap; }
+    .ll-item { display: flex; align-items: center; gap: 5px; }
+    .ll-dot { width: 10px; height: 10px; border-radius: 3px; }
 
-    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; transition: background .2s; }
-    .btn-outline { background: transparent; border: 1px solid #ddd; color: #333; }
-    .btn-outline:hover { background: #f5f5f5; }
-    .btn-primary { background: #2c3e50; color: #fff; }
-    .btn-primary:hover { background: #1a252f; }
-    .btn-sm { padding: 8px 16px; font-size: 13px; }
+    /* ── Grid layout ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+    @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
 
-    .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
-    .link-display { background: #f5f5f5; padding: 8px 14px; border-radius: 8px; font-size: 12px; color: #555; word-break: break-all; flex: 1; }
+    /* ── Cards ── */
+    .card { background: var(--card); border-radius: var(--r); padding: 22px 24px; box-shadow: 0 1px 3px rgba(0,0,0,.06); margin-bottom: 18px; }
+    .card-title { font-size: 14px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .card-title span { font-size: 12px; color: var(--muted); font-weight: 500; }
 
-    .open-answer { max-width: 300px; font-size: 12px; color: #555; line-height: 1.4; }
-    .empty { text-align: center; padding: 40px; color: #999; font-size: 14px; }
+    /* ── Section averages ── */
+    .section-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .sec-name { font-size: 12px; font-weight: 600; color: var(--text); width: 200px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sec-bar-bg { flex: 1; height: 10px; background: #f0f0f0; border-radius: 20px; overflow: hidden; }
+    .sec-bar-fill { height: 100%; border-radius: 20px; transition: width .6s; }
+    .sec-avg { font-size: 12px; font-weight: 700; width: 32px; text-align: right; flex-shrink: 0; }
 
-    .detail-toggle { cursor: pointer; color: #2c3e50; font-weight: 600; font-size: 12px; }
+    /* ── Per-question bars ── */
+    .q-row { padding: 10px 0; border-bottom: 1px solid #f3f4f6; }
+    .q-row:last-child { border-bottom: none; }
+    .q-row-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+    .q-id { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); flex-shrink: 0; margin-top: 2px; width: 24px; }
+    .q-txt { font-size: 12px; color: var(--text); flex: 1; line-height: 1.4; }
+    .q-avg { font-size: 13px; font-weight: 700; flex-shrink: 0; width: 36px; text-align: right; }
+    .q-bar-bg { height: 6px; background: #f0f0f0; border-radius: 10px; overflow: hidden; margin: 0 0 4px; }
+    .q-bar-fill { height: 100%; border-radius: 10px; transition: width .5s; }
+    .q-dist { display: flex; gap: 3px; }
+    .dist-seg { display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; border-radius: 3px; padding: 1px 0; min-width: 18px; flex: 1; }
+    .dist-seg.v1 { background: #ef4444; }
+    .dist-seg.v2 { background: #f97316; }
+    .dist-seg.v3 { background: #eab308; color: #78350f; }
+    .dist-seg.v4 { background: #22c55e; }
+    .dist-seg.v5 { background: #10b981; }
+    .dist-seg.zero { background: #e5e7eb; color: var(--muted); }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 2px solid var(--border); }
+    .tab { padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .15s; user-select: none; }
+    .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ── Responses table ── */
+    .resp-table table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .resp-table thead th { text-align: left; padding: 8px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); border-bottom: 2px solid var(--border); }
+    .resp-table tbody td { padding: 10px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+    .resp-table tbody tr:last-child td { border-bottom: none; }
+    .resp-table tbody tr:hover td { background: #fafbfc; }
+
+    /* ── Mini 1-5 grid ── */
+    .mini-answers { display: flex; flex-wrap: wrap; gap: 3px; max-width: 300px; }
+    .ma { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .ma.v1 { background: #ef4444; }
+    .ma.v2 { background: #f97316; }
+    .ma.v3 { background: #eab308; color: #78350f; }
+    .ma.v4 { background: #22c55e; }
+    .ma.v5 { background: #10b981; }
+    .ma.vx { background: #e5e7eb; color: var(--muted); }
+
+    .level { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+    .level-Principiante { background: var(--red-l); color: #b91c1c; }
+    .level-Intermedio { background: var(--amber-l); color: #92400e; }
+    .level-Avanzato { background: var(--green-l); color: #065f46; }
+
+    .toggle-link { color: var(--blue); cursor: pointer; font-size: 11px; font-weight: 600; text-decoration: none; white-space: nowrap; }
     .detail-row { display: none; }
-    .detail-row.show { display: table-row; }
-    .detail-cell { padding: 12px 12px 20px; background: #fafbfc; }
-    .detail-cell .q-item { padding: 4px 0; font-size: 12px; display: flex; gap: 8px; }
-    .detail-cell .q-item .correct { color: #16a34a; }
-    .detail-cell .q-item .wrong { color: #dc2626; }
+    .detail-row.open { display: table-row; }
+    .detail-cell { padding: 12px 10px 16px; background: #f8fafc; }
+    .detail-q { display: flex; gap: 8px; padding: 4px 0; font-size: 11px; }
+    .dq-num { font-family: 'DM Mono', monospace; color: var(--muted); flex-shrink: 0; }
+    .dq-text { flex: 1; color: var(--text); }
+    .dq-val { font-weight: 700; flex-shrink: 0; }
+
+    /* ── Open answers ── */
+    .open-ans-grid { display: grid; gap: 10px; }
+    .oa-item { background: var(--bg); border-radius: 9px; padding: 14px; }
+    .oa-name { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .oa-q { font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+    .oa-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+    .empty { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
   </style>
 </head>
 <body>
   <div class="topbar">
-    <h1><img src="/logo.png" alt=""> Risultati — <%= company.name %></h1>
-    <a href="/admin">&larr; Torna alla lista</a>
+    <div class="topbar-brand">
+      <img src="/logo.png" alt="">
+      <div>
+        <div class="bname">Autovalutazione AI</div>
+        <div class="bsub">Admin</div>
+      </div>
+    </div>
+    <div class="topbar-nav">
+      <a href="/admin">← Lista aziende</a>
+    </div>
   </div>
 
-  <div class="container">
-    <!-- Stats -->
-    <div class="card">
-      <div class="stats-grid">
-        <div class="stat-box">
-          <div class="value"><%= stats.total %></div>
-          <div class="label">Risposte totali</div>
-        </div>
-        <div class="stat-box">
-          <div class="value"><%= stats.avgScore %></div>
-          <div class="label">Media punteggio</div>
-        </div>
-        <div class="stat-box principiante">
-          <div class="value"><%= stats.principiante %></div>
-          <div class="label">Principiante</div>
-        </div>
-        <div class="stat-box intermedio">
-          <div class="value"><%= stats.intermedio %></div>
-          <div class="label">Intermedio</div>
-        </div>
-        <div class="stat-box avanzato">
-          <div class="value"><%= stats.avanzato %></div>
-          <div class="label">Avanzato</div>
-        </div>
+  <div class="page">
+
+    <!-- Company header -->
+    <div class="company-head">
+      <div>
+        <h1><%= company.name %></h1>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">Creata il <%= new Date(company.created_at+'Z').toLocaleDateString('it-IT') %></div>
       </div>
-
-      <% if (stats.total > 0) { %>
-        <% const pPct = (stats.principiante / stats.total * 100).toFixed(0); %>
-        <% const iPct = (stats.intermedio / stats.total * 100).toFixed(0); %>
-        <% const aPct = (stats.avanzato / stats.total * 100).toFixed(0); %>
-        <div class="bar-chart">
-          <% if (stats.principiante > 0) { %><div class="seg p" style="width:<%= pPct %>%"><%= pPct %>%</div><% } %>
-          <% if (stats.intermedio > 0) { %><div class="seg i" style="width:<%= iPct %>%"><%= iPct %>%</div><% } %>
-          <% if (stats.avanzato > 0) { %><div class="seg a" style="width:<%= aPct %>%"><%= aPct %>%</div><% } %>
-        </div>
-        <div style="display:flex;gap:20px;font-size:11px;color:#888">
-          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#ef4444;display:inline-block"></span> Principiante</span>
-          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#f59e0b;display:inline-block"></span> Intermedio</span>
-          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#22c55e;display:inline-block"></span> Avanzato</span>
-        </div>
-      <% } %>
-    </div>
-
-    <!-- Toolbar -->
-    <div class="card">
-      <div class="toolbar">
+      <div class="link-row">
         <% const testUrl = protocol + '://' + host + '/test/' + company.slug; %>
-        <span class="link-display"><%= testUrl %></span>
-        <button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText('<%= testUrl %>')">Copia link</button>
+        <span class="link-code" id="turl"><%= testUrl %></span>
+        <button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('turl').textContent).then(()=>{this.textContent='✓ Copiato';setTimeout(()=>this.textContent='Copia link',2000)})">Copia link</button>
         <% if (stats.total > 0) { %>
-          <a href="/admin/companies/<%= company.id %>/export" class="btn btn-primary btn-sm">Esporta CSV</a>
+          <a href="/admin/companies/<%= company.id %>/export" class="btn btn-green btn-sm">⬇ CSV</a>
         <% } %>
       </div>
     </div>
 
-    <!-- Responses table -->
-    <div class="card">
-      <h2>Risposte individuali</h2>
-      <% if (responses.length === 0) { %>
-        <div class="empty">Nessuna risposta ricevuta</div>
-      <% } else { %>
-        <div style="overflow-x:auto">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Nome</th>
-              <th>Ruolo</th>
-              <th>Punteggio</th>
-              <th>Livello</th>
-              <th>Uso AI nel lavoro</th>
-              <th>Preoccupazione</th>
-              <th>Data</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <% responses.forEach((r, idx) => { %>
-              <tr>
-                <td><%= responses.length - idx %></td>
-                <td><strong><%= r.respondent_name || '—' %></strong></td>
-                <td><%= r.respondent_role || '—' %></td>
-                <td><strong><%= r.score %></strong>/27</td>
-                <td><span class="level level-<%= r.level %>"><%= r.level %></span></td>
-                <td><div class="open-answer"><%= r.open_20 || '—' %></div></td>
-                <td><div class="open-answer"><%= r.open_21 || '—' %></div></td>
-                <td style="white-space:nowrap;font-size:12px;color:#888"><%= new Date(r.created_at + 'Z').toLocaleDateString('it-IT', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) %></td>
-                <td><span class="detail-toggle" onclick="toggleDetail(<%= r.id %>)">Dettagli</span></td>
-              </tr>
-              <tr class="detail-row" id="detail-<%= r.id %>">
-                <td colspan="9" class="detail-cell">
-                  <% for (const q of questions) { %>
-                    <% if (q.correct === null) continue; %>
-                    <% const userAns = r.parsedAnswers['q' + q.id]; %>
-                    <% const isCorrect = parseInt(userAns) === q.correct; %>
-                    <div class="q-item">
-                      <span class="<%= isCorrect ? 'correct' : 'wrong' %>"><%= isCorrect ? '✓' : '✗' %></span>
-                      <span><strong>D<%= q.id %>:</strong> <%= q.text %></span>
-                      <span style="margin-left:auto;color:#888">
-                        Risposta: <%= userAns !== undefined ? q.options[parseInt(userAns)] : 'N/A' %>
-                        <% if (!isCorrect) { %> — Corretta: <%= q.options[q.correct] %><% } %>
-                      </span>
-                    </div>
-                  <% } %>
-                </td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
+    <!-- KPI row -->
+    <div class="kpi-row">
+      <div class="kpi blue">
+        <div class="val"><%= stats.total %></div>
+        <div class="lbl">Risposte</div>
+      </div>
+      <div class="kpi">
+        <div class="val" style="color:<%= parseFloat(stats.avgScore)<=2?'#ef4444':parseFloat(stats.avgScore)<=3.5?'#f59e0b':'#10b981' %>"><%= stats.avgScore %><span style="font-size:14px;font-weight:500;color:#9ca3af">/5</span></div>
+        <div class="lbl">Media /5</div>
+      </div>
+      <div class="kpi red">
+        <div class="val"><%= stats.principiante %></div>
+        <div class="lbl">Principiante</div>
+      </div>
+      <div class="kpi amber">
+        <div class="val"><%= stats.intermedio %></div>
+        <div class="lbl">Intermedio</div>
+      </div>
+      <div class="kpi green">
+        <div class="val"><%= stats.avanzato %></div>
+        <div class="lbl">Avanzato</div>
+      </div>
+    </div>
+
+    <!-- Level distribution bar -->
+    <% if (stats.total > 0) { %>
+      <div class="card" style="padding:18px 24px">
+        <div class="card-title">Distribuzione livelli</div>
+        <% const pPct=(stats.principiante/stats.total*100).toFixed(0); %>
+        <% const iPct=(stats.intermedio/stats.total*100).toFixed(0); %>
+        <% const aPct=(stats.avanzato/stats.total*100).toFixed(0); %>
+        <div class="level-bar-wrap">
+          <div class="level-bar">
+            <% if (stats.principiante>0) { %><div class="seg p" style="flex:<%= stats.principiante %>"><%= pPct %>%</div><% } %>
+            <% if (stats.intermedio>0) { %><div class="seg i" style="flex:<%= stats.intermedio %>"><%= iPct %>%</div><% } %>
+            <% if (stats.avanzato>0) { %><div class="seg a" style="flex:<%= stats.avanzato %>"><%= aPct %>%</div><% } %>
+          </div>
         </div>
-      <% } %>
+        <div class="level-legend">
+          <div class="ll-item"><div class="ll-dot" style="background:#ef4444"></div> Principiante (<%= stats.principiante %>) — media ≤ 2.0/5</div>
+          <div class="ll-item"><div class="ll-dot" style="background:#f59e0b"></div> Intermedio (<%= stats.intermedio %>) — media 2.1–3.5/5</div>
+          <div class="ll-item"><div class="ll-dot" style="background:#10b981"></div> Avanzato (<%= stats.avanzato %>) — media > 3.5/5</div>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Two-col: section avgs + per-question -->
+    <% if (stats.total > 0) { %>
+    <div class="two-col">
+
+      <!-- Section averages -->
+      <div class="card">
+        <div class="card-title">Media per sezione <span>su scala 1–5</span></div>
+        <% for (const s of sections) { %>
+          <% const avg = sectionStats[s]; %>
+          <% const pct = avg ? Math.round(parseFloat(avg)/5*100) : 0; %>
+          <% const col = !avg ? '#ccc' : parseFloat(avg)<=2 ? '#ef4444' : parseFloat(avg)<=3.5 ? '#f59e0b' : '#10b981'; %>
+          <div class="section-row">
+            <div class="sec-name" title="<%= s %>"><%= s %></div>
+            <div class="sec-bar-bg">
+              <div class="sec-bar-fill" style="width:<%= pct %>%;background:<%= col %>"></div>
+            </div>
+            <div class="sec-avg" style="color:<%= col %>"><%= avg || '—' %></div>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Per-question averages -->
+      <div class="card" style="overflow:hidden">
+        <div class="card-title">Dettaglio per domanda <span>media + distribuzione</span></div>
+        <div style="max-height:360px;overflow-y:auto">
+          <% for (const q of questions) { %>
+            <% const qs = questionStats[q.id]; %>
+            <% const qAvg = qs.avg; %>
+            <% const qPct = qAvg ? Math.round(parseFloat(qAvg)/5*100) : 0; %>
+            <% const qCol = !qAvg?'#ccc':parseFloat(qAvg)<=2?'#ef4444':parseFloat(qAvg)<=3.5?'#f59e0b':'#10b981'; %>
+            <div class="q-row">
+              <div class="q-row-top">
+                <div class="q-id">Q<%= q.id %></div>
+                <div class="q-txt"><%= q.text.length > 80 ? q.text.substring(0,80)+'…' : q.text %></div>
+                <div class="q-avg" style="color:<%= qCol %>"><%= qAvg || '—' %></div>
+              </div>
+              <div class="q-bar-bg">
+                <div class="q-bar-fill" style="width:<%= qPct %>%;background:<%= qCol %>"></div>
+              </div>
+              <div class="q-dist">
+                <% for (let v=1; v<=5; v++) { %>
+                  <% const n = qs.dist[v-1]; %>
+                  <div class="dist-seg v<%= v %> <%= n===0?'zero':'' %>" title="Valore <%= v %>: <%= n %> persone">
+                    <%= n > 0 ? n : '' %>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+    </div>
+    <% } %>
+
+    <!-- Responses + Open answers with tabs -->
+    <div class="card">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('risposte')">Risposte individuali (<%= responses.length %>)</div>
+        <div class="tab" onclick="switchTab('aperte')">Domande aperte</div>
+      </div>
+
+      <!-- Tab: individual responses -->
+      <div id="tab-risposte" class="tab-pane active">
+        <% if (responses.length === 0) { %>
+          <div class="empty">Nessuna risposta ricevuta</div>
+        <% } else { %>
+          <div class="resp-table" style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Nome</th>
+                  <th>Ruolo</th>
+                  <th>Media/5</th>
+                  <th>Livello</th>
+                  <th>Risposte (1-5)</th>
+                  <th>Data</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% responses.forEach((r, idx) => { %>
+                  <% const respAvg = (r.score / numQuestions).toFixed(1); %>
+                  <% const rCol = parseFloat(respAvg)<=2?'#ef4444':parseFloat(respAvg)<=3.5?'#f59e0b':'#10b981'; %>
+                  <tr>
+                    <td style="font-family:'DM Mono',monospace;color:var(--muted);font-size:11px"><%= responses.length - idx %></td>
+                    <td><strong><%= r.respondent_name || '—' %></strong></td>
+                    <td style="color:var(--muted)"><%= r.respondent_role || '—' %></td>
+                    <td>
+                      <span style="font-weight:800;font-size:14px;color:<%= rCol %>"><%= respAvg %></span>
+                      <span style="font-size:10px;color:var(--muted)">/5</span>
+                    </td>
+                    <td><span class="level level-<%= r.level %>"><%= r.level %></span></td>
+                    <td>
+                      <div class="mini-answers">
+                        <% for (const q of questions) { %>
+                          <% const v = parseInt(r.parsedAnswers['q'+q.id]); %>
+                          <div class="ma <%= v>=1&&v<=5?'v'+v:'vx' %>" title="Q<%= q.id %>: <%= v||'?' %>"><%= v>=1&&v<=5?v:'?' %></div>
+                        <% } %>
+                      </div>
+                    </td>
+                    <td style="white-space:nowrap;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">
+                      <%= new Date(r.created_at+'Z').toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}) %><br>
+                      <%= new Date(r.created_at+'Z').toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}) %>
+                    </td>
+                    <td>
+                      <a class="toggle-link" onclick="toggleDetail(<%= r.id %>)">Dettaglio</a>
+                    </td>
+                  </tr>
+                  <tr class="detail-row" id="dr-<%= r.id %>">
+                    <td colspan="8" class="detail-cell">
+                      <% for (const q of questions) { %>
+                        <% const v = parseInt(r.parsedAnswers['q'+q.id]); %>
+                        <% const vLabel = v>=1&&v<=5 ? scale[q.type].steps[v-1] : 'N/A'; %>
+                        <div class="detail-q">
+                          <div class="dq-num">Q<%= q.id %></div>
+                          <div class="dq-text"><%= q.text %></div>
+                          <div class="dq-val" style="color:<%= v<=2?'#ef4444':v<=3?'#f59e0b':'#10b981' %>"><%= v || '?' %>/5 — <%= vLabel %></div>
+                        </div>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Tab: open answers -->
+      <div id="tab-aperte" class="tab-pane">
+        <% const withAnswers = responses.filter(r => r.open_20 || r.open_21); %>
+        <% if (withAnswers.length === 0) { %>
+          <div class="empty">Nessuna risposta aperta inserita</div>
+        <% } else { %>
+          <div class="open-ans-grid">
+            <% for (const r of withAnswers) { %>
+              <div class="oa-item">
+                <div class="oa-name"><%= r.respondent_name || 'Anonimo' %> — <span style="font-weight:400;color:var(--muted)"><%= r.respondent_role %></span></div>
+                <% if (r.open_20) { %>
+                  <div class="oa-q"><%= openQuestions[0].text %></div>
+                  <div class="oa-text"><%= r.open_20 %></div>
+                <% } %>
+                <% if (r.open_21) { %>
+                  <div style="margin-top:10px">
+                  <div class="oa-q"><%= openQuestions[1].text %></div>
+                  <div class="oa-text"><%= r.open_21 %></div>
+                  </div>
+                <% } %>
+              </div>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+
     </div>
   </div>
 
   <script>
     function toggleDetail(id) {
-      document.getElementById('detail-' + id).classList.toggle('show');
+      const row = document.getElementById('dr-' + id);
+      row.classList.toggle('open');
+    }
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      event.target.classList.add('active');
     }
   </script>
 </body>

@@ -3,110 +3,223 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Questionario AI — <%= company.name %></title>
+  <title>Autovalutazione AI — <%= company.name %></title>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-  <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --navy: #0f1c2e;
+      --navy2: #1a2e47;
+      --blue: #2f6fef;
+      --blue-light: #e8f0fe;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --text: #1a1a2e;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --radius: 12px;
+    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a1a; line-height: 1.5; }
-    .header { background: #2c3e50; color: #fff; padding: 32px; text-align: center; }
-    .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-    .header p { font-size: 14px; opacity: .8; }
-    .header .company { font-size: 13px; opacity: .6; margin-top: 8px; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
 
-    .container { max-width: 720px; margin: 0 auto; padding: 24px 20px 60px; }
+    /* ── Progress bar ── */
+    .prog-wrap { position: fixed; top: 0; left: 0; right: 0; height: 4px; background: rgba(0,0,0,.08); z-index: 999; }
+    .prog-bar { height: 100%; background: linear-gradient(90deg, var(--blue), var(--green)); transition: width .4s ease; }
 
-    .section-title { font-size: 16px; font-weight: 700; color: #2c3e50; padding: 14px 0 8px; margin-top: 20px; border-bottom: 2px solid #2c3e50; margin-bottom: 16px; }
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+      color: #fff; padding: 40px 20px 36px; text-align: center;
+    }
+    .header img { width: 72px; height: 72px; object-fit: contain; display: block; margin: 0 auto 20px; }
+    .header h1 { font-size: 24px; font-weight: 700; letter-spacing: -.3px; }
+    .header .sub { font-size: 14px; opacity: .7; margin-top: 6px; }
+    .header .company-badge {
+      display: inline-block; margin-top: 14px; background: rgba(255,255,255,.12);
+      padding: 5px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;
+    }
+    .intro-note {
+      max-width: 640px; margin: 0 auto; margin-top: 18px; padding: 14px 18px;
+      background: rgba(255,255,255,.09); border-radius: 10px;
+      font-size: 13px; color: rgba(255,255,255,.8); line-height: 1.6;
+    }
 
-    .question-card { background: #fff; border-radius: 10px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
-    .question-card .q-num { font-size: 11px; font-weight: 700; color: #2c3e50; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
-    .question-card .q-text { font-size: 15px; font-weight: 600; margin-bottom: 14px; color: #1a1a1a; }
+    /* ── Container ── */
+    .container { max-width: 700px; margin: 0 auto; padding: 28px 16px 80px; }
 
-    .options label { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; margin-bottom: 4px; border-radius: 8px; cursor: pointer; transition: background .15s; font-size: 14px; color: #333; }
-    .options label:hover { background: #f5f7fa; }
-    .options input[type=radio],
-    .options input[type=checkbox] { margin-top: 3px; accent-color: #2c3e50; flex-shrink: 0; }
+    /* ── Section header ── */
+    .section-header {
+      display: flex; align-items: center; gap: 12px; margin: 32px 0 14px;
+    }
+    .section-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--blue); flex-shrink: 0; }
+    .section-name { font-size: 13px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: .8px; }
+    .section-line { flex: 1; height: 1px; background: var(--border); }
 
-    .text-input { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; transition: border .2s; }
-    .text-input:focus { border-color: #2c3e50; }
-    textarea.text-input { min-height: 80px; resize: vertical; }
+    /* ── Question card ── */
+    .q-card {
+      background: var(--card); border-radius: var(--radius); padding: 22px 24px;
+      margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      border: 1.5px solid transparent; transition: border-color .2s;
+    }
+    .q-card.answered { border-color: #d1fae5; }
+    .q-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 8px; letter-spacing: .4px; }
+    .q-text { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 16px; line-height: 1.5; }
 
+    /* ── Scale type badge ── */
+    .scale-label {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .6px; padding: 3px 10px; border-radius: 20px;
+      margin-bottom: 14px;
+    }
+    .scale-label.knowledge { background: #eff6ff; color: #2563eb; }
+    .scale-label.usage { background: #f0fdf4; color: #16a34a; }
+
+    /* ── Scale buttons ── */
+    .scale-row {
+      display: flex; gap: 8px; flex-wrap: nowrap;
+    }
+    .scale-opt { flex: 1; }
+    .scale-opt input[type=radio] { display: none; }
+    .scale-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 2px solid var(--border); border-radius: 10px;
+      padding: 10px 4px 8px; cursor: pointer; transition: all .18s;
+      text-align: center; user-select: none; min-width: 0;
+    }
+    .scale-btn .num {
+      font-size: 18px; font-weight: 700; color: var(--muted); line-height: 1; margin-bottom: 5px;
+    }
+    .scale-btn .lbl { font-size: 10px; color: var(--muted); line-height: 1.2; font-weight: 500; }
+    .scale-btn:hover { border-color: var(--blue); background: var(--blue-light); }
+    .scale-btn:hover .num, .scale-btn:hover .lbl { color: var(--blue); }
+
+    .scale-opt input:checked + .scale-btn {
+      border-color: var(--blue); background: var(--blue);
+    }
+    .scale-opt input:checked + .scale-btn .num,
+    .scale-opt input:checked + .scale-btn .lbl { color: #fff; }
+
+    /* Color per value */
+    .scale-opt:nth-child(1) input:checked + .scale-btn { background: #ef4444; border-color: #ef4444; }
+    .scale-opt:nth-child(2) input:checked + .scale-btn { background: #f97316; border-color: #f97316; }
+    .scale-opt:nth-child(3) input:checked + .scale-btn { background: #eab308; border-color: #eab308; }
+    .scale-opt:nth-child(4) input:checked + .scale-btn { background: #22c55e; border-color: #22c55e; }
+    .scale-opt:nth-child(5) input:checked + .scale-btn { background: #10b981; border-color: #10b981; }
+
+    @media (max-width: 500px) {
+      .scale-btn { padding: 8px 2px 6px; }
+      .scale-btn .num { font-size: 16px; }
+      .scale-btn .lbl { font-size: 9px; }
+    }
+
+    /* ── Profile card ── */
     .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .profile-grid .field label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 6px; }
+    .field label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+    .text-input { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 9px; font-size: 14px; font-family: inherit; outline: none; transition: border .2s; }
+    .text-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47,111,239,.1); }
+    textarea.text-input { min-height: 88px; resize: vertical; }
     @media (max-width: 500px) { .profile-grid { grid-template-columns: 1fr; } }
 
-    .submit-area { text-align: center; margin-top: 32px; }
-    .submit-btn { padding: 14px 48px; background: #2c3e50; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: background .2s; }
-    .submit-btn:hover { background: #1a252f; }
-    .submit-btn:disabled { opacity: .5; cursor: not-allowed; }
+    /* ── Open questions ── */
+    .open-q .q-text { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
 
-    .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: #2c3e50; transition: width .3s; z-index: 100; }
+    /* ── Submit ── */
+    .submit-area { text-align: center; margin-top: 36px; }
+    .submit-btn {
+      padding: 15px 52px; background: var(--navy); color: #fff;
+      border: none; border-radius: 12px; font-size: 16px; font-weight: 700;
+      cursor: pointer; transition: background .2s, transform .1s;
+      font-family: inherit;
+    }
+    .submit-btn:hover { background: #0a1422; transform: translateY(-1px); }
+    .submit-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .submit-note { font-size: 12px; color: var(--muted); margin-top: 10px; }
 
-    .note { font-size: 12px; color: #888; margin-top: 4px; }
-    .required { color: #dc2626; }
+    /* ── Counter ── */
+    .counter-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--navy); color: rgba(255,255,255,.8);
+      padding: 10px 24px; display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; z-index: 100;
+    }
+    .counter-bar strong { color: #fff; }
   </style>
 </head>
 <body>
-  <div class="progress-bar" id="progress"></div>
+  <div class="prog-wrap"><div class="prog-bar" id="prog" style="width:0%"></div></div>
 
   <div class="header">
-    <img src="/logo.png" alt="Skillcraft" style="width:80px;height:80px;object-fit:contain;margin-bottom:16px">
-    <h1>Questionario di Valutazione</h1>
-    <p>Competenze in Intelligenza Artificiale</p>
-    <div class="company"><%= company.name %></div>
+    <img src="/logo.png" alt="Skillcraft">
+    <h1>Autovalutazione AI</h1>
+    <div class="sub">Questionario sulle competenze in Intelligenza Artificiale</div>
+    <div class="company-badge"><%= company.name %></div>
+    <div class="intro-note">
+      Non ci sono risposte giuste o sbagliate. Indica onestamente quanto conosci o utilizzi
+      ciascun argomento su una scala da <strong>1</strong> (per niente) a <strong>5</strong> (ottimamente).
+      Ci vorranno circa <strong>5 minuti</strong>.
+    </div>
   </div>
 
   <div class="container">
     <form method="POST" action="/test/<%= company.slug %>" id="quiz-form">
 
       <!-- Profilo -->
-      <div class="section-title">Sezione 1 — Profilo</div>
-
-      <div class="question-card">
+      <div class="section-header">
+        <div class="section-dot"></div>
+        <div class="section-name">Sezione 1 — Profilo</div>
+        <div class="section-line"></div>
+      </div>
+      <div class="q-card" id="card-profile">
         <div class="profile-grid">
           <div class="field">
-            <label for="respondent_name">Nome e cognome</label>
-            <input type="text" id="respondent_name" name="respondent_name" class="text-input" required>
+            <label for="rname">Nome e cognome</label>
+            <input type="text" id="rname" name="respondent_name" class="text-input" required autocomplete="name">
           </div>
           <div class="field">
-            <label for="respondent_role">Ruolo in azienda</label>
-            <input type="text" id="respondent_role" name="respondent_role" class="text-input" placeholder="Es. Manager, Tecnico IT, Commerciale..." required>
+            <label for="rrole">Ruolo in azienda</label>
+            <input type="text" id="rrole" name="respondent_role" class="text-input" placeholder="Es. Manager, Tecnico, Commerciale…" required>
           </div>
         </div>
       </div>
 
-      <div class="question-card">
-        <div class="q-num">Domanda 2</div>
-        <div class="q-text">Hai mai utilizzato strumenti di AI (es. ChatGPT, Copilot, Midjourney)?</div>
-        <div class="options">
-          <label><input type="radio" name="q2" value="0" required> Mai</label>
-          <label><input type="radio" name="q2" value="1"> Sì, occasionalmente</label>
-          <label><input type="radio" name="q2" value="2"> Sì, regolarmente</label>
-          <label><input type="radio" name="q2" value="3"> Sì, quotidianamente per lavoro</label>
+      <!-- Scored questions -->
+      <%
+        let currentSection = '';
+        let sectionNum = 1;
+        let qNum = 0;
+        for (const q of questions) {
+          qNum++;
+          if (q.section !== currentSection) {
+            currentSection = q.section;
+            sectionNum++;
+      %>
+        <div class="section-header">
+          <div class="section-dot"></div>
+          <div class="section-name">Sezione <%= sectionNum %> — <%= q.section %></div>
+          <div class="section-line"></div>
         </div>
-      </div>
+      <% } %>
 
-      <!-- Scored questions grouped by section -->
-      <% let currentSection = ''; %>
-      <% for (const q of questions) { %>
-        <% if (q.section !== currentSection) { %>
-          <% currentSection = q.section; %>
-          <% const sectionNum = q.id <= 5 ? 2 : q.id <= 8 ? 3 : q.id <= 11 ? 4 : q.id <= 14 ? 5 : 6; %>
-          <div class="section-title">Sezione <%= sectionNum %> — <%= q.section %></div>
-        <% } %>
-
-        <div class="question-card">
-          <div class="q-num">Domanda <%= q.id %></div>
-          <div class="q-text"><%= q.text %> <% if (!q.multi) { %><span class="required">*</span><% } %></div>
-          <div class="options">
-            <% for (let i = 0; i < q.options.length; i++) { %>
-              <label>
-                <% if (q.multi) { %>
-                  <input type="checkbox" name="q<%= q.id %>" value="<%= i %>">
-                <% } else { %>
-                  <input type="radio" name="q<%= q.id %>" value="<%= i %>" required>
-                <% } %>
-                <%= q.options[i] %>
+        <div class="q-card" id="card-q<%= q.id %>">
+          <div class="q-num">Domanda <%= qNum %> / <%= questions.length %></div>
+          <div class="q-text"><%= q.text %></div>
+          <div class="scale-label <%= q.type %>">
+            <% if (q.type === 'knowledge') { %>⬡<% } else { %>⬢<% } %>
+            <%= scale[q.type].label %>
+          </div>
+          <div class="scale-row">
+            <% for (let i = 1; i <= 5; i++) { %>
+              <label class="scale-opt">
+                <input type="radio" name="q<%= q.id %>" value="<%= i %>" required>
+                <div class="scale-btn" onclick="">
+                  <div class="num"><%= i %></div>
+                  <div class="lbl"><%= scale[q.type].steps[i-1] %></div>
+                </div>
               </label>
             <% } %>
           </div>
@@ -114,56 +227,69 @@
       <% } %>
 
       <!-- Open questions -->
-      <div class="section-title">Sezione 7 — Domande Aperte</div>
-
-      <div class="question-card">
-        <div class="q-num">Domanda 20</div>
-        <div class="q-text">Descrivi brevemente come potresti usare l'AI nel tuo lavoro:</div>
-        <textarea name="open_20" class="text-input" placeholder="Scrivi qui la tua risposta..."></textarea>
+      <div class="section-header">
+        <div class="section-dot"></div>
+        <div class="section-name">Sezione Finale — Domande Aperte</div>
+        <div class="section-line"></div>
       </div>
-
-      <div class="question-card">
-        <div class="q-num">Domanda 21</div>
-        <div class="q-text">Qual è la tua principale preoccupazione nell'utilizzo dell'AI?</div>
-        <textarea name="open_21" class="text-input" placeholder="Scrivi qui la tua risposta..."></textarea>
-      </div>
+      <% for (const oq of openQuestions) { %>
+        <div class="q-card open-q">
+          <div class="q-text"><%= oq.text %></div>
+          <textarea name="<%= oq.id %>" class="text-input" placeholder="Scrivi qui la tua risposta (facoltativo)…"></textarea>
+        </div>
+      <% } %>
 
       <div class="submit-area">
-        <button type="submit" class="submit-btn" id="submit-btn">Invia questionario</button>
-        <div class="note" style="margin-top:12px">Le risposte sono anonime e saranno utilizzate per personalizzare il corso</div>
+        <button type="submit" class="submit-btn" id="submit-btn">Invia autovalutazione →</button>
+        <div class="submit-note">Le risposte sono riservate e serviranno a personalizzare il percorso formativo</div>
       </div>
     </form>
   </div>
 
+  <div class="counter-bar">
+    <span>Completamento: <strong id="pct-text">0%</strong></span>
+    <span id="remaining-text"><%= questions.length %> domande da rispondere</span>
+  </div>
+
   <script>
-    // Progress bar
     const form = document.getElementById('quiz-form');
-    const progress = document.getElementById('progress');
-    const allRequired = form.querySelectorAll('input[required], textarea[required]');
-    const radioGroups = new Set();
-    form.querySelectorAll('input[type=radio][required]').forEach(r => radioGroups.add(r.name));
-    const totalSteps = radioGroups.size + form.querySelectorAll('input[type=text][required]').length;
+    const prog = document.getElementById('prog');
+    const totalQ = <%= questions.length %>;
 
     function updateProgress() {
-      let filled = 0;
-      radioGroups.forEach(name => {
-        if (form.querySelector(`input[name="${name}"]:checked`)) filled++;
+      let done = 0;
+      const names = new Set();
+      form.querySelectorAll('input[type=radio][required]').forEach(r => names.add(r.name));
+      names.forEach(name => {
+        if (form.querySelector(`input[name="${name}"]:checked`)) done++;
       });
-      form.querySelectorAll('input[type=text][required]').forEach(inp => {
-        if (inp.value.trim()) filled++;
+      // also count text fields
+      let textFilled = 0;
+      form.querySelectorAll('input[type=text][required]').forEach(i => { if (i.value.trim()) textFilled++; });
+      const total = names.size;
+      const pct = total ? Math.round(done / total * 100) : 0;
+      prog.style.width = pct + '%';
+      document.getElementById('pct-text').textContent = pct + '%';
+      const rem = total - done;
+      document.getElementById('remaining-text').textContent = rem > 0 ? rem + ' domande da rispondere' : '✓ Tutto compilato!';
+
+      // Mark cards as answered
+      names.forEach(name => {
+        const card = document.getElementById('card-' + name);
+        if (card) card.classList.toggle('answered', !!form.querySelector(`input[name="${name}"]:checked`));
       });
-      const pct = Math.min(100, Math.round(filled / totalSteps * 100));
-      progress.style.width = pct + '%';
     }
 
     form.addEventListener('change', updateProgress);
     form.addEventListener('input', updateProgress);
 
-    // Prevent double submit
-    form.addEventListener('submit', function() {
-      document.getElementById('submit-btn').disabled = true;
-      document.getElementById('submit-btn').textContent = 'Invio in corso...';
+    form.addEventListener('submit', () => {
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Invio in corso…';
     });
+
+    updateProgress();
   </script>
 </body>
 </html>

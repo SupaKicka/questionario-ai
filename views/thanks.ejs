@@ -3,42 +3,106 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Questionario completato</title>
+  <title>Autovalutazione completata</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-  <link rel="apple-touch-icon" sizes="192x192" href="/favicon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --navy: #0f1c2e; --blue: #2f6fef; --green: #10b981;
+      --amber: #f59e0b; --red: #ef4444;
+      --text: #1a1a2e; --muted: #6b7280; --border: #e5e7eb; --bg: #f0f2f6;
+    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .card { background: #fff; border-radius: 16px; padding: 48px 40px; box-shadow: 0 2px 12px rgba(0,0,0,.08); max-width: 480px; width: 100%; text-align: center; }
-    .check { width: 64px; height: 64px; border-radius: 50%; background: #f0fdf4; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
-    .check svg { width: 32px; height: 32px; color: #16a34a; }
-    h1 { font-size: 22px; color: #1a1a1a; margin-bottom: 8px; }
-    p { font-size: 14px; color: #666; line-height: 1.6; margin-bottom: 24px; }
-    .result-box { background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 24px; }
-    .score { font-size: 36px; font-weight: 800; color: #2c3e50; }
-    .score span { font-size: 16px; font-weight: 400; color: #999; }
-    .level { display: inline-block; margin-top: 8px; padding: 4px 16px; border-radius: 20px; font-size: 14px; font-weight: 700; }
-    .level-Principiante { background: #fef2f2; color: #dc2626; }
-    .level-Intermedio { background: #fffbeb; color: #d97706; }
-    .level-Avanzato { background: #f0fdf4; color: #16a34a; }
-    .company { font-size: 12px; color: #aaa; margin-top: 16px; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+
+    .card { background: #fff; border-radius: 20px; padding: 44px 40px; max-width: 520px; width: 100%; box-shadow: 0 4px 24px rgba(0,0,0,.09); text-align: center; }
+    .logo { width: 72px; height: 72px; object-fit: contain; display: block; margin: 0 auto 12px; }
+
+    .check-circle { width: 60px; height: 60px; border-radius: 50%; background: #d1fae5; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+    .check-circle svg { width: 28px; height: 28px; color: var(--green); }
+
+    h1 { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+    .subtitle { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 28px; }
+
+    /* ── Score box ── */
+    .score-box { border-radius: 14px; padding: 22px; margin-bottom: 22px; border: 2px solid; }
+    .score-box.p { border-color: #fca5a5; background: #fef2f2; }
+    .score-box.i { border-color: #fcd34d; background: #fffbeb; }
+    .score-box.a { border-color: #6ee7b7; background: #f0fdf4; }
+
+    .score-main { font-size: 44px; font-weight: 800; line-height: 1; }
+    .score-main .of5 { font-size: 18px; font-weight: 500; color: var(--muted); }
+    .score-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-top: 4px; }
+
+    .level-badge { display: inline-block; margin-top: 12px; padding: 5px 18px; border-radius: 20px; font-size: 13px; font-weight: 800; }
+    .level-badge.p { background: #fee2e2; color: #b91c1c; }
+    .level-badge.i { background: #fef3c7; color: #92400e; }
+    .level-badge.a { background: #d1fae5; color: #065f46; }
+
+    .level-desc { font-size: 13px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+
+    /* ── Section breakdown ── */
+    .section-breakdown { text-align: left; margin-bottom: 22px; }
+    .sb-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; }
+    .sb-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+    .sb-name { font-size: 11px; font-weight: 600; flex: 1; color: var(--text); }
+    .sb-bar-bg { width: 90px; height: 8px; background: #f0f0f0; border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+    .sb-bar-fill { height: 100%; border-radius: 10px; }
+    .sb-val { font-size: 11px; font-weight: 700; width: 26px; text-align: right; flex-shrink: 0; }
+
+    .company-tag { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+    .DESCRIPTIONS {
+      p { Principiante } i { Intermedio } a { Avanzato }
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <img src="/logo.png" alt="Skillcraft" style="width:80px;height:80px;object-fit:contain;display:block;margin:0 auto 16px">
-    <div class="check">
+    <img src="/logo.png" alt="Skillcraft" class="logo">
+    <div class="check-circle">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
       </svg>
     </div>
     <h1>Grazie!</h1>
-    <p>Il questionario è stato inviato correttamente.<br>Le tue risposte ci aiuteranno a personalizzare il corso.</p>
-    <div class="result-box">
-      <div class="score"><%= score %> <span>/ 27</span></div>
-      <div class="level level-<%= level %>"><%= level %></div>
+    <p class="subtitle">La tua autovalutazione è stata inviata correttamente.<br>I risultati aiuteranno a personalizzare il percorso formativo.</p>
+
+    <%
+      const lvl = level;
+      const lvlClass = lvl==='Principiante'?'p':lvl==='Intermedio'?'i':'a';
+      const levelDescs = {
+        Principiante: "Stai muovendo i primi passi con l'AI. Il corso ti fornirà basi solide per usarla con consapevolezza.",
+        Intermedio: "Hai già una buona familiarità con l'AI. Il corso approfondirà gli aspetti tecnici e pratici più avanzati.",
+        Avanzato: "Hai una conoscenza avanzata. Il corso ti permetterà di esplorare architetture complesse e casi d'uso professionali."
+      };
+    %>
+
+    <!-- Score box -->
+    <div class="score-box <%= lvlClass %>">
+      <div class="score-main"><%= avg %><span class="of5">/5</span></div>
+      <div class="score-label">media per domanda</div>
+      <div class="level-badge <%= lvlClass %>"><%= level %></div>
+      <div class="level-desc"><%= levelDescs[level] %></div>
     </div>
-    <div class="company"><%= company.name %></div>
+
+    <!-- Section breakdown -->
+    <div class="section-breakdown">
+      <div class="sb-title">Il tuo profilo per area</div>
+      <% for (const s of sections) { %>
+        <% const sAvg = sectionAvgs[s]; %>
+        <% const sPct = sAvg ? Math.round(parseFloat(sAvg)/5*100) : 0; %>
+        <% const sCol = !sAvg?'#ccc':parseFloat(sAvg)<=2?'#ef4444':parseFloat(sAvg)<=3.5?'#f59e0b':'#10b981'; %>
+        <div class="sb-row">
+          <div class="sb-name"><%= s.replace('Agenti e Architetture Complesse','Agenti & Architetture') %></div>
+          <div class="sb-bar-bg"><div class="sb-bar-fill" style="width:<%= sPct %>%;background:<%= sCol %>"></div></div>
+          <div class="sb-val" style="color:<%= sCol %>"><%= sAvg || '—' %></div>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="company-tag"><%= company.name %></div>
   </div>
 </body>
 </html>
